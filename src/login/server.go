@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/html"
 	"github.com/joho/godotenv"
 )
 
@@ -20,14 +21,28 @@ func main() {
 	initEnv()
 	getAuthorize()
 	getToken()
-	app := fiber.New()
+
+	// Load html
+	engine := html.New("./views", ".html")
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
+
 	// Load static file like CSS, Images, JS ...
 	app.Static("/public", "./public")
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("hello world")
+		return c.Render("index", fiber.Map{
+			"Title":    "Kakao login REST API",
+			"SubTitle": "Start kakao REST API call!!",
+		})
 	})
+
 	log.Fatal(app.Listen(":3000"))
+}
+
+func callKakaoLogin() {
+	fmt.Println("Called")
 }
 
 func getToken() {
