@@ -1,119 +1,86 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
 	"github.com/joho/godotenv"
-	"golang.org/x/oauth2"
 )
 
 var (
-	apiKey       string
-	baseUrl      string
-	redirectUrl  string
-	clientID     string
-	clientSecret string
-	OAuthConf    *oauth2.Config
+	BASE_URL string
+	REST_API_CLIENT_KEY string
+	REDIRECT_URI string
 )
 
+type kakaoTokenResult struct{
+	AccessToken string `json:"access_toekn"`
+	TokenType string `json:"token_type"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn uint64 `json:"expires_in"`
+	RefreshTokenExpiresIn uint64 `json:"refresh_token_expires_in"`
+}
 func main() {
-	initEnv()
-	initOAuth()
+	// load dotenv
+	err := godotenv.Load()
+	if err != nil{
+		panic("dotenv load failed")
+	}
 
-	// Load html
+	// set up enviromental variable
+	BASE_URL = os.Getenv("BASE_URL")
+	REST_API_CLIENT_KEY = os.Getenv("REST_API_CLIENT_KEY")
+	REDIRECT_URI = os.Getenv("REDIRECT_URI")
+
+	// serve static resources
 	engine := html.New("./views", ".html")
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
-
-	// Load static file like CSS, Images, JS ...
 	app.Static("/public", "./public")
+
+	// auth controller 
+	app.Get("/oauth", func(c *fiber.Ctx) error{
+		code := c.Query("code")
+		fmt.Println("code : ", code)
+
+		// retrieve token from user code
+		resp, err := http.PostForm(BASE_URL + "/oauth/token", url.Values{
+			"grant_type" : []string{"authorization_code"},
+			"client_id" : []string{os.Getenv("REST_API_CLIENT_KEY")},
+			"redirect_uri" : []string{os.Getenv("BASE_URL")},
+			"code" : []string {code},
+		})
+		if err != nil{
+			panic("준")
+		}
+		var token kakaoTokenResult
+		decoder := json.NewDecoder(resp.Body)
+		if err := decoder.Decode(&token); err == nil{
+			fmt.Println(token)
+			return c.SendString("엄!")
+		}
+
+		// TODO: use token 
+		// :)
+		//
+		return c.SendString("식!")
+	})
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Render("index", fiber.Map{
-			"Title":    "Kakao login REST API",
-			"SubTitle": "Start kakao REST API call!!",
+			"Title":    "카카오 REST 예제",
+			"SubTitle": "예제입니다",
+			"REST_API_CLIENT_KEY": REST_API_CLIENT_KEY,
+			"REDIRECT_URI" : REDIRECT_URI,
+			"BASE_URL" : BASE_URL,
 		})
 	})
-
-	app.Get("/oauth/callback", func(c *fiber.Ctx) error {
-		return c.Render("kakao_login", nil)
-	})
-
-	api := app.Group("/api")
-
-	v1 := api.Group("/v1")
-	v1.Get("/login", func(c *fiber.Ctx) error {
-		kakaoLogin()
-		return c.SendString("Get /api/v1/login")
-	})
-
 	log.Fatal(app.Listen(":3000"))
-}
-
-func initOAuth() {
-	OAuthConf = &oauth2.Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		RedirectURL:  redirectUrl,
-	}
-}
-
-func kakaoLogin() {
-	getOAuthorize()
-	getToken()
-}
-
-func getToken() error {
-	fmt.Println("getToken")
-	return nil
-}
-
-func getOAuthorize() error {
-	url := fmt.Sprintf("%s/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code", baseUrl, apiKey, redirectUrl)
-	//url := fmt.Sprintf("%s/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=account_emai", baseUrl, apiKey, redirectUrl)
-	res, err := http.Get(url)
-	//fmt.Println(url)
-	//fmt.Println(res)
-	if err != nil {
-		return err
-	}
-
-	data, dErr := ioutil.ReadAll(res.Body)
-	if dErr != nil {
-		return dErr
-	}
-
-	file, cErr := os.Create("views/kakao_login.html")
-	if cErr != nil {
-		return cErr
-	}
-	_, wErr := file.Write([]byte(data))
-	if wErr != nil {
-		return wErr
-	}
-	return nil
-}
-
-func initEnv() {
-	eErr := godotenv.Load()
-	checkErr(eErr, "Error loading .env file")
-
-	apiKey = os.Getenv("REST_API_KEY")
-	baseUrl = os.Getenv("BASE_URL")
-	redirectUrl = os.Getenv("REDIRECT_URI")
-	clientID = os.Getenv("Client_ID")
-	clientSecret = os.Getenv("Client_Secret")
-}
-
-func checkErr(err error, msg string) {
-	if err != nil {
-		log.Fatal(msg)
-	}
 }

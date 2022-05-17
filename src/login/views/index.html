@@ -1,19 +1,27 @@
 <!DOCTYPE html>
 <html lang="kr">
-    <header>
-        <meta charset="UTF-8">
-    </header>
-    <body>
-        <div class="container">
-            <img src="/public/img/fiber_v2_logo.svg" width="250">
-            <h1>{{.Title}}</h1>
-        </div>
-        
-        <div class="container">
-            <h3>{{.SubTitle}}</h3>
-            <button type="button" onclick="callKakaoLogin()">
-                <img src="/public/img/kakao_login/en/kakao_login_large_narrow.png" width="200"/>
-            </button>
-        </div>
-    </body>
+<header>
+    <meta charset="UTF-8">
+</header>
+
+<body>
+    <div class="container">
+        <img src="/public/img/fiber_v2_logo.svg" width="250">
+        <h1>{{.Title}}</h1>
+    </div>
+
+    <div class="container">
+        <h3>{{.SubTitle}}</h3>
+        <button onclick="login()">
+            카카오 로그인
+        </button>
+    </div>
+
+    <script>
+        function login() {
+            window.open({{.BASE_URL }} + '/oauth/authorize?client_id=' + {{.REST_API_CLIENT_KEY }} + '&redirect_uri=' + {{.REDIRECT_URI }} + '&response_type=code')
+        }
+    </script>
+</body>
+
 </html>
