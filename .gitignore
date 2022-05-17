@@ -65,5 +65,6 @@ Temporary Items
 ### chapakook ###
 # Config file
 *.env
+*.http
 
 # End of https://www.toptal.com/developers/gitignore/api/go,macos
