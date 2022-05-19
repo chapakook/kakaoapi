@@ -12,15 +12,17 @@
     </div>
 
     <div class="container">
+        <h6>Token: {{.Token}}</h6>
+    </div>
+
+    <div class="container">
         <h3>{{.SubTitle}}</h3>
-        <button class="login" onclick="login()">
-            <img src="/public/img/kakao_login/en/kakao_login_large_narrow.png" />
-        </button>
+        <button class="info" onclick="get_info()">Start</button>
     </div>
 
     <script>
-        function login() {
-            window.open({{.BASE_URL }} + '/oauth/authorize?client_id=' + {{.REST_API_CLIENT_KEY }} + '&redirect_uri=' + {{.REDIRECT_URI }} + '&response_type=code')
+        function get_info() {
+            window.open('http://localhost:3000/two')
         }
     </script>
 </body>
