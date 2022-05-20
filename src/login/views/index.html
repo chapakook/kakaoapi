@@ -20,7 +20,7 @@
 
     <script>
         function login() {
-            window.open({{.BASE_URL }} + '/oauth/authorize?client_id=' + {{.REST_API_CLIENT_KEY }} + '&redirect_uri=' + {{.REDIRECT_URI }} + '&response_type=code')
+            location.href={{.BASE_URL }} + '/oauth/authorize?client_id=' + {{.REST_API_CLIENT_KEY }} + '&redirect_uri=' + {{.REDIRECT_URI }} + '&response_type=code'
         }
     </script>
 </body>

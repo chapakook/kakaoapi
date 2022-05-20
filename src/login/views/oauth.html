@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<header>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./public/css/style.css">
+</header>
+
+<body>
+    <div class="container">
+        <img class="logo" src="/public/img/fiber_v2_logo.svg">
+        <h1>{{.Title}}</h1>
+    </div>
+
+    <div class="container">
+        <h6>
+            [+] Auth Result<br>
+            TokenType: {{.TokenType}}<br>
+            AccessToken: {{.AccessToken}}<br>
+            ExpiresIn: {{.ExpiresIn}}<br>
+            RefreshToken: {{.RefreshToken}}<br>
+            RefreshTokenExpiresIn: {{.RefreshTokenExpiresIn}}<br>
+            Scope: {{.Scope}}<br>
+        </h6>
+    </div>
+
+    <div class="container">
+        <h3>{{.SubTitle}}</h3>
+        <button class="get" onclick="get_info()">Start</button>
+    </div>
+
+    <script>
+        function get_info() {
+            location.href='http://localhost:3000/info'+'?accesstoken='+{{.AccessToken}}+'&refreshtoken='+{{.RefreshToken}}
+        }
+
+        function setCookie(key,value,expiredays){
+            let todayDate = new Date()
+            todayDate.setDate(todayDate.getDate()+expiredays)
+            // todayDate.setTime(todayDate.getTime()+(expiredays*24*60*60*1000)) // ms
+            document.cookie=key+'='+escape(value)+'; path=/; expires='+todayDate.toGMTString()+';'
+        }
+
+        function delCookie(key){
+            let todayDate = new Date()
+            document.cookie = key+'=; path=/; expires='+todayDate.toGMTString()+';'
+        }
+    </script>
+</body>
+
+</html>

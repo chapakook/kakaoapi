@@ -10,19 +10,24 @@
         <img class="logo" src="/public/img/fiber_v2_logo.svg">
         <h1>{{.Title}}</h1>
     </div>
-
+    
     <div class="container">
-        <h6>Token: {{.Token}}</h6>
+        <h6>
+            [+] Token Info<br>
+            ID: {{.ID}}<br>
+            AppIn: {{.AppIn}}<br>
+            ExpiresIn: {{.ExpiresIn}}<br>
+        </h6>
     </div>
 
     <div class="container">
         <h3>{{.SubTitle}}</h3>
-        <button class="info" onclick="get_info()">Start</button>
+        <button class="get" onclick="get_refresh()">Start</button>
     </div>
 
     <script>
-        function get_info() {
-            window.open('http://localhost:3000/two')
+        function get_refresh() {
+            location.href='http://localhost:3000/refresh?accesstoken='+{{.AccessToken}}+'&refreshtoken='+{{.RefreshToken}}
         }
     </script>
 </body>
