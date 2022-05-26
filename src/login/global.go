@@ -18,7 +18,7 @@ func init() {
 	// load dotenv
 	err := godotenv.Load()
 	if err != nil {
-		panic("dotenv load failed")
+		panic(err)
 	}
 
 	// set up enviromental variable
@@ -26,5 +26,4 @@ func init() {
 	BASE_API_URL = os.Getenv("BASE_API_URL")
 	REST_API_CLIENT_KEY = os.Getenv("REST_API_CLIENT_KEY")
 	REDIRECT_URI = os.Getenv("REDIRECT_URI")
-	LOGOUT_REDIRECT_URI = os.Getenv("LOGOUT_REDIRECT_URI")
 }

@@ -11,7 +11,7 @@ import (
 
 func Index(c *fiber.Ctx) error {
 	return c.Render("index", fiber.Map{
-		"Title":               "Kakao REST API example",
+		"Title":               "Kakao REST API Example - Login",
 		"SubTitle":            "Step 1 - Get Token!",
 		"REST_API_CLIENT_KEY": REST_API_CLIENT_KEY,
 		"REDIRECT_URI":        REDIRECT_URI,
