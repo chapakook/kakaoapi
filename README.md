@@ -8,8 +8,24 @@ go get -u github.com/gofiber/v2
 ```
 -----
 
-### API List
-- [x] Login
-- [ ] KKK
-- [ ] 운동 하기
-- [x] 강의 듣기
+## API List
+### Social integration API
+- [x] ~~Kakao Login~~
+- [ ] Kakao Talk Social
+- [ ] Message
+- [ ] Map/Local
+- [ ] Kakao Navi
+- [ ] Kakao Story
+### Business API
+- [ ] Kakao Sync
+- [ ] Kakao Talk Channel
+- [ ] Kakao Pay
+- [ ] Kakao Moment
+- [ ] Kakao Keyword Ad
+- [ ] Push Notification
+### Artificial Intelligence(AI) API
+- [ ] Search
+- [ ] Voice
+- [ ] Vision
+- [ ] Pose
+- [ ] Translation
