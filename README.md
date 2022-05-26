@@ -10,7 +10,7 @@ go get -u github.com/gofiber/v2
 
 ## API List
 ### Social integration API
-- [x] <span sytle="color:gray">~~Kakao Login~~</span>
+- [x] ~~<span sytle="color:gray">Kakao Login</span>~~
 - [ ] Kakao Talk Social
 - [ ] Message
 - [ ] Map/Local
