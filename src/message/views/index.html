@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<header>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./public/css/style.css">
+</header>
+
+<body>
+    <div class="container">
+        <img class="logo" src="/public/img/fiber_v2_logo.svg">
+        <h1>{{.Title}}</h1>
+    </div>
+
+    <div class="container">
+        <h3>{{.SubTitle}}</h3>
+        <button class="login" onclick="login()">
+            <img src="/public/img/kakao_login/en/kakao_login_large_narrow.png"/>
+        </button>
+    </div>
+
+    <script>
+        function login() {
+            location.href={{.BASE_URL }} + '/oauth/authorize?client_id=' + {{.REST_API_CLIENT_KEY }} + '&redirect_uri=' + {{.REDIRECT_URI }} + '&response_type=code'
+        }
+
+        // function popup_login(){
+        //     let width = 500;
+        //     let height = 600;
+        //     let top = (window.innerHeight)/2+screenY;
+        //     let left = (window.innerWidth)/2+screenX;
+            
+        //     let name = '_parent';
+        //     let url = {{.BASE_URL }} + '/oauth/authorize?client_id=' + {{.REST_API_CLIENT_KEY }} + '&redirect_uri=' + {{.REDIRECT_URI }} + '&response_type=code';
+        //     let spec = 'location=yes,status=nomscrollbars=yes,resizable=no';
+        //     spec += ', width='+width+', height='+height;
+        //     spec += ', top='+top+', left='+left;
+        //     window.open(url,name,spec,true);
+        // }
+    </script>
+</body>
+
+</html>
