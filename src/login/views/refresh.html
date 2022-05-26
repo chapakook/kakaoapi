@@ -29,7 +29,6 @@
 
     <script>
         function get_logout() {
-            //location.href={{.BASE_URL}}+'/oauth/logout?client_id='+{{.REST_API_CLIENT_KEY}}+'&logout_redirect_uri='+{{.LOGOUT_REDIRECT_URI}}
             location.href='http://localhost:3000/logout?accesstoken='+{{.AccessToken}}
         }
     </script>

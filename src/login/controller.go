@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 
@@ -52,7 +51,7 @@ func OAuth(c *fiber.Ctx) error {
 	fmt.Println("	TokenType : ", auth.TokenType)
 
 	return c.Render("oauth", fiber.Map{
-		"Title":        "Step 1 - Get Token Success!!",
+		"Title":        "Get Token Success!!",
 		"SubTitle":     "Step 2 - Get Token Info",
 		"AuthResult":   auth,
 		"TokenType":    auth.TokenType,
@@ -88,8 +87,8 @@ func Info(c *fiber.Ctx) error {
 	fmt.Println("	ExpiresIn : ", tokenInfo.ExpiresIn)
 
 	return c.Render("info", fiber.Map{
-		"Title":        "Step 2 - Get Token Success!!",
-		"SubTitle":     "Step 3 - Get Refresh Token",
+		"Title":        "Info Token Success!!",
+		"SubTitle":     "Step 3 - Refresh Token",
 		"ID":           tokenInfo.ID,
 		"AppIn":        tokenInfo.AppIn,
 		"ExpiresIn":    tokenInfo.ExpiresIn,
@@ -125,38 +124,66 @@ func Refresh(c *fiber.Ctx) error {
 	fmt.Println("	RefreshTokenExpiresIn : ", auth.RefreshTokenExpiresIn)
 
 	return c.Render("refresh", fiber.Map{
-		"Title":                 "Step 3 - Refresh Token Success!!",
+		"Title":                 "Refresh Token Success!!",
 		"SubTitle":              "Step 4 - Logout",
 		"TokenType":             auth.TokenType,
 		"AccessToken":           auth.AccessToken,
 		"ExpiresIn":             auth.ExpiresIn,
 		"RefreshToken":          auth.RefreshToken,
 		"RefreshTokenExpiresIn": auth.RefreshTokenExpiresIn,
-		"BASE_URL":              BASE_URL,
-		"REST_API_CLIENT_KEY":   REST_API_CLIENT_KEY,
-		"LOGOUT_REDIRECT_URI":   LOGOUT_REDIRECT_URI,
 	})
 }
 
 func Logout(c *fiber.Ctx) error {
-	fmt.Println(c.Query("accesstoken"))
 	client := http.Client{}
+
+	// Logout
 	req, err := http.NewRequest("POST", BASE_API_URL+"/v1/user/logout", nil)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	req.Header.Add("Authorization", "Bearer "+c.Query("accesstoken"))
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	var id LogoutInfo
-	err = json.NewDecoder(resp.Body).Decode(&id)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("[+] Logout")
-	fmt.Println("ID: ", id)
 
-	return c.SendString("success")
+	var logoutinfo LogoutInfo
+	err = json.NewDecoder(resp.Body).Decode(&logoutinfo)
+	if err != nil {
+		panic(err)
+	}
+
+	// print info's in console
+	fmt.Println("[+] Logout")
+	fmt.Println("	ID : ", logoutinfo.ID)
+
+	// Unlink
+	req, err = http.NewRequest("POST", BASE_API_URL+"/v1/user/unlink", nil)
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Add("Authorization", "Bearer "+c.Query("accesstoken"))
+	resp, err = client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&logoutinfo)
+	if err != nil {
+		panic(err)
+	}
+
+	// print info's in console
+	fmt.Println("[+] Unlink")
+	fmt.Println("	ID : ", logoutinfo.ID)
+
+	return c.Redirect("http://localhost:3000/end?ID=" + fmt.Sprint(logoutinfo.ID))
+}
+
+func End(c *fiber.Ctx) error {
+	return c.Render("end", fiber.Map{
+		"Title": "Logout Success",
+		"ID":    c.Query("ID"),
+	})
 }

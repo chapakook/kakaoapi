@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<header>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./public/css/style.css">
+</header>
+
+<body>
+    <div class="container">
+        <img class="logo" src="/public/img/fiber_v2_logo.svg">
+        <h1>{{.Title}}</h1>
+    </div>
+
+    <div class="container">
+        <h6>
+            [+] Logout<br>
+            ID: {{.ID}}<br>
+        </h6>
+    </div>
+
+    <div class="container">
+        <button class="get" onclick="go_home()">HOME</button>
+    </div>
+
+    <script>
+        function go_home() {
+            location.href='http://localhost:3000'
+        }
+    </script>
+</body>
+
+</html>

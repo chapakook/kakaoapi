@@ -23,6 +23,7 @@ func main() {
 	app.Get("/info", Info)
 	app.Get("/refresh", Refresh)
 	app.Get("/logout", Logout)
+	app.Get("/end", End)
 
 	log.Fatal(app.Listen(":3000"))
 }
