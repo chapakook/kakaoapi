@@ -1,6 +1,13 @@
 # kakaoapi sample - chapakook
 
-### login
+### Login
+use library
+```
+go get -u github.com/joho/godotenv
+go get -u github.com/gofiber/v2
+go get -u github.com/gofiber/template/html
+```
+### Messgae
 use library
 ```
 go get -u github.com/joho/godotenv
@@ -8,7 +15,6 @@ go get -u github.com/gofiber/v2
 go get -u github.com/gofiber/template/html
 ```
 -----
-
 ## Sample API List
 ### Social integration API
 - [x] [Kakao Login](https://developers.kakao.com/product/kakaoLogin), last update: 2022.05
