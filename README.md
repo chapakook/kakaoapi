@@ -9,5 +9,7 @@ go get -u github.com/gofiber/v2
 -----
 
 ### API List
-[x] login
-[ ] KKK
+- [x] Login
+- [ ] KKK
+- [ ] 운동 하기
+- [x] 강의 듣기
