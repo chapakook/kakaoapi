@@ -22,6 +22,8 @@ func main() {
 	app.Get("/oauth", OAuth)
 	app.Get("/info", Info)
 	app.Get("/refresh", Refresh)
+	app.Get("/scopes", Scopes)
+	app.Get("/revoke", Revoke)
 	app.Get("/logout", Logout)
 	app.Get("/end", End)
 

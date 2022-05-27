@@ -24,12 +24,12 @@
 
     <div class="container">
         <h3>{{.SubTitle}}</h3>
-        <button class="get" onclick="get_logout()">Start</button>
+        <button class="get" onclick="get_scope()">Start</button>
     </div>
 
     <script>
-        function get_logout() {
-            location.href='http://localhost:3000/logout?accesstoken='+{{.AccessToken}}
+        function get_scope() {
+            location.href='http://localhost:3000/scopes'
         }
     </script>
 </body>

@@ -13,23 +13,19 @@
 
     <div class="container">
         <h6>
-            [+] Auth Result<br>
-            TokenType: {{.TokenType}}<br>
-            AccessToken: {{.AccessToken}}<br>
-            ExpiresIn: {{.ExpiresIn}}<br>
-            RefreshToken: {{.RefreshToken}}<br>
-            RefreshTokenExpiresIn: {{.RefreshTokenExpiresIn}}<br>
+            [+] Scopes Info<br>
+            Scopes: {{.Scopes}}<br>
         </h6>
     </div>
 
     <div class="container">
         <h3>{{.SubTitle}}</h3>
-        <button class="get" onclick="get_info()">Start</button>
+        <button class="get" onclick="revoke()">Start</button>
     </div>
 
     <script>
-        function get_info() {
-            location.href='http://localhost:3000/info'
+        function revoke() {
+            location.href='http://localhost:3000/revoke?id='+{{.ID}}
         }
     </script>
 </body>

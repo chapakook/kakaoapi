@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -41,13 +44,24 @@ func OAuth(c *fiber.Ctx) error {
 		panic(err)
 	}
 
+	// add cookies
+	cookie := new(fiber.Cookie)
+	cookie.Name = "accesstoken"
+	cookie.Value = auth.AccessToken
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	c.Cookie(cookie)
+
+	cookie.Name = "refreshtoken"
+	cookie.Value = auth.RefreshToken
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	c.Cookie(cookie)
+
 	// print info's in console
 	fmt.Println("[+] Auth Info")
 	fmt.Println("	AccessToken : ", auth.AccessToken)
 	fmt.Println("	ExpiresIn : ", auth.ExpiresIn)
 	fmt.Println("	RefreshToken : ", auth.RefreshToken)
 	fmt.Println("	RefreshTokenExpiresIn : ", auth.RefreshTokenExpiresIn)
-	fmt.Println("	Scope : ", auth.Scope)
 	fmt.Println("	TokenType : ", auth.TokenType)
 
 	return c.Render("oauth", fiber.Map{
@@ -58,7 +72,6 @@ func OAuth(c *fiber.Ctx) error {
 		"AccessToken":  auth.AccessToken,
 		"ExpiresIn":    auth.ExpiresIn,
 		"RefreshToken": auth.RefreshToken,
-		"Scope":        auth.Scope,
 	})
 }
 
@@ -68,7 +81,7 @@ func Info(c *fiber.Ctx) error {
 	if err != nil {
 		panic(err)
 	}
-	req.Header.Add("Authorization", "Bearer "+c.Query("accesstoken"))
+	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
 	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
@@ -87,13 +100,11 @@ func Info(c *fiber.Ctx) error {
 	fmt.Println("	ExpiresIn : ", tokenInfo.ExpiresIn)
 
 	return c.Render("info", fiber.Map{
-		"Title":        "Info Token Success!!",
-		"SubTitle":     "Step 3 - Refresh Token",
-		"ID":           tokenInfo.ID,
-		"AppIn":        tokenInfo.AppIn,
-		"ExpiresIn":    tokenInfo.ExpiresIn,
-		"AccessToken":  c.Query("accesstoken"),
-		"RefreshToken": c.Query("refreshtoken"),
+		"Title":     "Info Token Success!!",
+		"SubTitle":  "Step 3 - Refresh Token",
+		"ID":        tokenInfo.ID,
+		"AppIn":     tokenInfo.AppIn,
+		"ExpiresIn": tokenInfo.ExpiresIn,
 	})
 }
 
@@ -102,7 +113,7 @@ func Refresh(c *fiber.Ctx) error {
 	resp, err := http.PostForm(BASE_URL+"/oauth/token", url.Values{
 		"grant_type":    []string{"refresh_token"},
 		"client_id":     []string{REST_API_CLIENT_KEY},
-		"refresh_token": []string{c.Query("refreshtoken")},
+		"refresh_token": []string{c.Cookies("refreshtoken")},
 	})
 	if err != nil {
 		panic(err)
@@ -115,6 +126,22 @@ func Refresh(c *fiber.Ctx) error {
 		panic(err)
 	}
 
+	if auth.RefreshToken == "" {
+		auth.RefreshToken = c.Cookies("refreshtoken")
+	}
+
+	// add cookies
+	cookie := new(fiber.Cookie)
+	cookie.Name = "accesstoken"
+	cookie.Value = auth.AccessToken
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	c.Cookie(cookie)
+
+	cookie.Name = "refreshtoken"
+	cookie.Value = auth.RefreshToken
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	c.Cookie(cookie)
+
 	// print info's in console
 	fmt.Println("[+] Refresh Auth Info")
 	fmt.Println("	TokenType : ", auth.TokenType)
@@ -125,7 +152,7 @@ func Refresh(c *fiber.Ctx) error {
 
 	return c.Render("refresh", fiber.Map{
 		"Title":                 "Refresh Token Success!!",
-		"SubTitle":              "Step 4 - Logout",
+		"SubTitle":              "Step 4 - Get Scopes",
 		"TokenType":             auth.TokenType,
 		"AccessToken":           auth.AccessToken,
 		"ExpiresIn":             auth.ExpiresIn,
@@ -134,15 +161,114 @@ func Refresh(c *fiber.Ctx) error {
 	})
 }
 
+func Scopes(c *fiber.Ctx) error {
+	client := http.Client{}
+	req, err := http.NewRequest("GET", BASE_API_URL+"/v2/user/scopes", nil)
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	var scopes ScopeResult
+	err = json.NewDecoder(resp.Body).Decode(&scopes)
+	if err != nil {
+		panic(err)
+	}
+
+	// print info's in console
+	fmt.Println("[+] Scope Result")
+	fmt.Println("	ID : ", scopes.ID)
+
+	id := ""
+	for i, s := range scopes.Scopes {
+		fmt.Println("	Scopes - ", i)
+		fmt.Println("	  - Agreed : ", s.Agreed)
+		fmt.Println("	  - DisplayName : ", s.DisplayName)
+		fmt.Println("	  - ID : ", s.ID)
+		fmt.Println("	  - Revocable : ", s.Revocable)
+		fmt.Println("	  - Type : ", s.Type)
+		fmt.Println("	  - Using : ", s.Using)
+		id += s.ID + "|"
+	}
+
+	return c.Render("scopes", fiber.Map{
+		"Title":    "Get Scopes Success!!",
+		"SubTitle": "Step 5 - Revoke",
+		"Scopes":   scopes.Scopes,
+		"ID":       id,
+	})
+}
+
+func Revoke(c *fiber.Ctx) error {
+	// id parsing
+	tmp := c.Query("id")
+	var id []string
+	for tmp != "" {
+		n := strings.Index(tmp, "|")
+		id = append(id, tmp[:n-1])
+		arr := tmp[n+1:]
+		tmp = arr
+	}
+
+	params := url.Values{}
+	for _, i := range id {
+		params.Add("scopes", i)
+	}
+
+	client := http.Client{}
+	req, err := http.NewRequest("POST", BASE_API_URL+"/v2/user/revoke/scopes", bytes.NewBufferString(params.Encode()))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
+
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	var revoke RevokeResult
+	err = json.NewDecoder(resp.Body).Decode(&revoke)
+	if err != nil {
+		panic(err)
+	}
+
+	// print info's in console
+	fmt.Println("[+] Revoke Result")
+	fmt.Println("	TargetID : ", revoke.TargetID)
+	fmt.Println("	TargetIDType : ", revoke.TargetIDType)
+
+	for i, s := range revoke.Scopes {
+		fmt.Println("	Scopes - ", i)
+		fmt.Println("	  - Agreed : ", s.Agreed)
+		fmt.Println("	  - DisplayName : ", s.DisplayName)
+		fmt.Println("	  - ID : ", s.ID)
+		fmt.Println("	  - Revocable : ", s.Revocable)
+		fmt.Println("	  - Type : ", s.Type)
+		fmt.Println("	  - Using : ", s.Using)
+	}
+
+	return c.Render("revoke", fiber.Map{
+		"Title":        "Revoke Success!!",
+		"SubTitle":     "Step 6 - Logout",
+		"TargetID":     revoke.TargetID,
+		"TargetIDType": revoke.TargetIDType,
+		"Scopes":       revoke.Scopes,
+	})
+}
+
 func Logout(c *fiber.Ctx) error {
 	client := http.Client{}
 
-	// Logout
+	// logout
 	req, err := http.NewRequest("POST", BASE_API_URL+"/v1/user/logout", nil)
 	if err != nil {
 		panic(err)
 	}
-	req.Header.Add("Authorization", "Bearer "+c.Query("accesstoken"))
+	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
 	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
@@ -158,12 +284,12 @@ func Logout(c *fiber.Ctx) error {
 	fmt.Println("[+] Logout")
 	fmt.Println("	ID : ", logoutinfo.ID)
 
-	// Unlink
+	// unlink
 	req, err = http.NewRequest("POST", BASE_API_URL+"/v1/user/unlink", nil)
 	if err != nil {
 		panic(err)
 	}
-	req.Header.Add("Authorization", "Bearer "+c.Query("accesstoken"))
+	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
 	resp, err = client.Do(req)
 	if err != nil {
 		panic(err)
@@ -173,6 +299,9 @@ func Logout(c *fiber.Ctx) error {
 	if err != nil {
 		panic(err)
 	}
+
+	// cookies clear
+	c.ClearCookie()
 
 	// print info's in console
 	fmt.Println("[+] Unlink")

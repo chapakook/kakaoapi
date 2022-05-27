@@ -13,23 +13,21 @@
 
     <div class="container">
         <h6>
-            [+] Auth Result<br>
-            TokenType: {{.TokenType}}<br>
-            AccessToken: {{.AccessToken}}<br>
-            ExpiresIn: {{.ExpiresIn}}<br>
-            RefreshToken: {{.RefreshToken}}<br>
-            RefreshTokenExpiresIn: {{.RefreshTokenExpiresIn}}<br>
+            [+] Revoke Result<br>
+            TargetID: {{.TargetID}}<br>
+            TargetIDType: {{.TargetIDType}}<br>
+            Scopes: {{.Scopes}}<br>
         </h6>
     </div>
 
     <div class="container">
         <h3>{{.SubTitle}}</h3>
-        <button class="get" onclick="get_info()">Start</button>
+        <button class="get" onclick="logout()">Start</button>
     </div>
 
     <script>
-        function get_info() {
-            location.href='http://localhost:3000/info'
+        function logout() {
+            location.href='http://localhost:3000/logout'
         }
     </script>
 </body>
