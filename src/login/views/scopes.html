@@ -20,12 +20,12 @@
 
     <div class="container">
         <h3>{{.SubTitle}}</h3>
-        <button class="get" onclick="revoke()">Start</button>
+        <button class="get" onclick="logout()">logout</button>
     </div>
 
     <script>
-        function revoke() {
-            location.href='http://localhost:3000/revoke?id='+{{.ID}}
+        function logout() {
+            location.href='http://localhost:3000/logout'
         }
     </script>
 </body>

@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -197,69 +196,69 @@ func Scopes(c *fiber.Ctx) error {
 
 	return c.Render("scopes", fiber.Map{
 		"Title":    "Get Scopes Success!!",
-		"SubTitle": "Step 5 - Revoke",
+		"SubTitle": "Step 5 - Logout",
 		"Scopes":   scopes.Scopes,
 		"ID":       id,
 	})
 }
 
-func Revoke(c *fiber.Ctx) error {
-	tmp := c.Query("id")
-	var id []string
-	for tmp != "" {
-		n := strings.Index(tmp, "|")
-		id = append(id, tmp[:n])
-		arr := tmp[n+1:]
-		tmp = arr
-	}
+// error disable
+// func Revoke(c *fiber.Ctx) error {
+// 	tmp := c.Query("id")
+// 	var id []string
+// 	for tmp != "" {
+// 		n := strings.Index(tmp, "|")
+// 		id = append(id, "\""+tmp[:n]+"\"")
+// 		arr := tmp[n+1:]
+// 		tmp = arr
+// 	}
 
-	params := url.Values{}
-	for _, i := range id {
-		params.Add("scopes", i)
-	}
-	fmt.Println(params)
+// 	params := url.Values{}
+// 	str := strings.Join(id, ",")
+// 	str = "[" + str + "]"
+// 	params.Add("scopes", str)
+// 	fmt.Println(str)
 
-	client := http.Client{}
-	req, err := http.NewRequest("POST", BASE_API_URL+"/v2/user/revoke/scopes", bytes.NewBufferString(params.Encode()))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+// 	client := http.Client{}
+// 	req, err := http.NewRequest("POST", BASE_API_URL+"/v2/user/revoke/scopes", bytes.NewBufferString(params.Encode()))
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
+// 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	var revoke RevokeResult
-	err = json.NewDecoder(resp.Body).Decode(&revoke)
-	if err != nil {
-		panic(err)
-	}
+// 	resp, err := client.Do(req)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	var revoke RevokeResult
+// 	err = json.NewDecoder(resp.Body).Decode(&revoke)
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	// print info's in console
-	fmt.Println("[+] Revoke Result")
-	fmt.Println("	TargetID : ", revoke.TargetID)
-	fmt.Println("	TargetIDType : ", revoke.TargetIDType)
+// 	// print info's in console
+// 	fmt.Println("[+] Revoke Result")
+// 	fmt.Println("	TargetID : ", revoke.TargetID)
+// 	fmt.Println("	TargetIDType : ", revoke.TargetIDType)
+// 	for i, s := range revoke.Scopes {
+// 		fmt.Println("	Scopes - ", i)
+// 		fmt.Println("	  - Agreed : ", s.Agreed)
+// 		fmt.Println("	  - DisplayName : ", s.DisplayName)
+// 		fmt.Println("	  - ID : ", s.ID)
+// 		fmt.Println("	  - Revocable : ", s.Revocable)
+// 		fmt.Println("	  - Type : ", s.Type)
+// 		fmt.Println("	  - Using : ", s.Using)
+// 	}
 
-	for i, s := range revoke.Scopes {
-		fmt.Println("	Scopes - ", i)
-		fmt.Println("	  - Agreed : ", s.Agreed)
-		fmt.Println("	  - DisplayName : ", s.DisplayName)
-		fmt.Println("	  - ID : ", s.ID)
-		fmt.Println("	  - Revocable : ", s.Revocable)
-		fmt.Println("	  - Type : ", s.Type)
-		fmt.Println("	  - Using : ", s.Using)
-	}
-
-	return c.Render("revoke", fiber.Map{
-		"Title":        "Revoke Success!!",
-		"SubTitle":     "Step 6 - Logout",
-		"TargetID":     revoke.TargetID,
-		"TargetIDType": revoke.TargetIDType,
-		"Scopes":       revoke.Scopes,
-	})
-}
+// 	return c.Render("revoke", fiber.Map{
+// 		"Title":        "Revoke Success!!",
+// 		"SubTitle":     "Step 6 - Logout",
+// 		"TargetID":     revoke.TargetID,
+// 		"TargetIDType": revoke.TargetIDType,
+// 		"Scopes":       revoke.Scopes,
+// 	})
+// }
 
 func Logout(c *fiber.Ctx) error {
 	client := http.Client{}
@@ -308,12 +307,12 @@ func Logout(c *fiber.Ctx) error {
 	fmt.Println("[+] Unlink")
 	fmt.Println("	ID : ", logoutinfo.ID)
 
-	return c.Redirect("http://localhost:3000/end?ID=" + fmt.Sprint(logoutinfo.ID))
+	return c.Redirect("http://localhost:3000/end?id=" + strconv.FormatUint(logoutinfo.ID, 10))
 }
 
 func End(c *fiber.Ctx) error {
 	return c.Render("end", fiber.Map{
 		"Title": "Logout Success",
-		"ID":    c.Query("ID"),
+		"ID":    c.Query("id"),
 	})
 }
