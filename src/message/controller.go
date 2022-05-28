@@ -54,63 +54,51 @@ func OAuth(c *fiber.Ctx) error {
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	c.Cookie(cookie)
 
+	cookie.Name = "refreshtoken"
+	cookie.Value = auth.RefreshToken
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	c.Cookie(cookie)
+
 	return c.Redirect("http://localhost:3000/message")
 }
 
-func Message(c *fiber.Ctx) error {
+func Talk(c *fiber.Ctx) error {
 	return c.Render("message", fiber.Map{
 		"Title":    "Sucess Login",
 		"SubTitle": "Send To Me",
 	})
 }
 
-func Basic(c *fiber.Ctx) error {
+func Memo(c *fiber.Ctx) error {
 	return c.SendString("")
 }
 
-func BasicUser(c *fiber.Ctx) error {
-	return c.SendString("")
-}
-
-func Scrap(c *fiber.Ctx) error {
-	return c.SendString("")
-}
-
-func ScrapUser(c *fiber.Ctx) error {
-	return c.SendString("")
-}
-
-func SendToMe(c *fiber.Ctx) error {
+func Logout(c *fiber.Ctx) error {
 	client := http.Client{}
-	req, err := http.NewRequest("POST", BASE_API_URL+"/v2/api/talk/memo/default/send", nil)
+
+	// Logout
+	req, err := http.NewRequest("POST", BASE_API_URL+"/v1/user/logout", nil)
+	if err != nil {
+		panic(err)
+	}
+
+	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
+	_, err = client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	// Unlink
+	req, err = http.NewRequest("POST", BASE_API_URL+"/v1/user/unlink", nil)
 	if err != nil {
 		panic(err)
 	}
 	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
-
-	template := new(TextMessageTemplate)
-	template.ObjectType = "text"
-	template.Text = "Message API Text"
-	template.Link = Link{WebUrl: "https://developers.kakao.com/docs/latest/ko/message/rest-api"}
-
-	object, _ := json.Marshal(template)
-	fmt.Println(string(object))
-	req.PostForm.Add("template_object", string(object))
-
-	resp, err := client.Do(req)
+	_, err = client.Do(req)
 	if err != nil {
 		panic(err)
 	}
 
-	var sendtomeresult KakaoSendToMeResult
-	err = json.NewDecoder(resp.Body).Decode(&sendtomeresult)
-	if err != nil {
-		panic(err)
-	}
-
-	return c.SendString("")
-}
-
-func SendToFriends(c *fiber.Ctx) error {
-	return c.SendString("")
+	fmt.Println("Suceess")
+	return c.Redirect("http://localhost:3000")
 }
