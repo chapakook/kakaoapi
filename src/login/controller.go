@@ -204,12 +204,11 @@ func Scopes(c *fiber.Ctx) error {
 }
 
 func Revoke(c *fiber.Ctx) error {
-	// id parsing
 	tmp := c.Query("id")
 	var id []string
 	for tmp != "" {
 		n := strings.Index(tmp, "|")
-		id = append(id, tmp[:n-1])
+		id = append(id, tmp[:n])
 		arr := tmp[n+1:]
 		tmp = arr
 	}
@@ -218,6 +217,7 @@ func Revoke(c *fiber.Ctx) error {
 	for _, i := range id {
 		params.Add("scopes", i)
 	}
+	fmt.Println(params)
 
 	client := http.Client{}
 	req, err := http.NewRequest("POST", BASE_API_URL+"/v2/user/revoke/scopes", bytes.NewBufferString(params.Encode()))
@@ -225,6 +225,7 @@ func Revoke(c *fiber.Ctx) error {
 		panic(err)
 	}
 	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := client.Do(req)
 	if err != nil {
