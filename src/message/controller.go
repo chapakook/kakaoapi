@@ -51,19 +51,19 @@ func OAuth(c *fiber.Ctx) error {
 	cookie := new(fiber.Cookie)
 	cookie.Name = "accesstoken"
 	cookie.Value = auth.AccessToken
-	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.Expires = time.Now().Add(time.Duration(auth.ExpiresIn) * time.Second)
 	c.Cookie(cookie)
 
 	cookie.Name = "refreshtoken"
 	cookie.Value = auth.RefreshToken
-	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.Expires = time.Now().Add(time.Duration(auth.RefreshTokenExpiresIn) * time.Second)
 	c.Cookie(cookie)
 
-	return c.Redirect("http://localhost:3000/message")
+	return c.Redirect("http://localhost:3000/talk")
 }
 
 func Talk(c *fiber.Ctx) error {
-	return c.Render("message", fiber.Map{
+	return c.Render("talk", fiber.Map{
 		"Title":    "Sucess Login",
 		"SubTitle": "Send To Me",
 	})
