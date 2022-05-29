@@ -9,7 +9,7 @@ type KakaoAuthResult struct {
 	Scope                 string `json:"scope"`
 }
 
-type KakaoSendToMeResult struct {
+type SendResult struct {
 	ResultCode int `json:"result_code"`
 }
 
@@ -17,7 +17,7 @@ type Link struct {
 	WebUrl    string `json:"web_url"`
 	MobileUrl string `json:"mobile_web_url"`
 	Android   string `json:"android_execution_params"`
-	iOS       string `json:"ios_execution_params"`
+	IOS       string `json:"ios_execution_params"`
 }
 
 type TextMessageTemplate struct {

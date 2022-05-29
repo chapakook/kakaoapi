@@ -29,15 +29,11 @@ func OAuth(c *fiber.Ctx) error {
 		"redirect_uri": []string{REDIRECT_URI},
 		"code":         []string{code},
 	})
-	if err != nil {
-		panic(err)
-	}
+	CheckErr(err)
 
 	var auth KakaoAuthResult
 	err = json.NewDecoder(resp.Body).Decode(&auth)
-	if err != nil {
-		panic(err)
-	}
+	CheckErr(err)
 
 	// print info's in console
 	fmt.Println("[+] Auth Info")
@@ -59,18 +55,32 @@ func OAuth(c *fiber.Ctx) error {
 	cookie.Expires = time.Now().Add(time.Duration(auth.RefreshTokenExpiresIn) * time.Second)
 	c.Cookie(cookie)
 
-	return c.Redirect("http://localhost:3000/talk")
+	return c.Redirect("http://localhost:3000/message")
 }
 
-func Talk(c *fiber.Ctx) error {
-	return c.Render("talk", fiber.Map{
+func Message(c *fiber.Ctx) error {
+	return c.Render("message", fiber.Map{
 		"Title":    "Sucess Login",
 		"SubTitle": "Send To Me",
 	})
 }
 
-func Memo(c *fiber.Ctx) error {
-	return c.SendString("")
+func Send(c *fiber.Ctx) error {
+	client := http.Client{}
+	req, err := http.NewRequest("POST", BASE_API_URL+"/v2/api/talk/memo/default/send", nil)
+	CheckErr(err)
+	resp, err := client.Do(req)
+	CheckErr(err)
+
+	var sendResult SendResult
+	err = json.NewDecoder(resp.Body).Decode(&sendResult)
+	CheckErr(err)
+
+	// print info's in console
+	fmt.Println("[+] Default Send Result")
+	fmt.Println("	Result Code : ", sendResult.ResultCode)
+
+	return c.SendString("send")
 }
 
 func Logout(c *fiber.Ctx) error {
@@ -78,27 +88,18 @@ func Logout(c *fiber.Ctx) error {
 
 	// Logout
 	req, err := http.NewRequest("POST", BASE_API_URL+"/v1/user/logout", nil)
-	if err != nil {
-		panic(err)
-	}
+	CheckErr(err)
 
 	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
 	_, err = client.Do(req)
-	if err != nil {
-		panic(err)
-	}
+	CheckErr(err)
 
 	// Unlink
 	req, err = http.NewRequest("POST", BASE_API_URL+"/v1/user/unlink", nil)
-	if err != nil {
-		panic(err)
-	}
+	CheckErr(err)
 	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
 	_, err = client.Do(req)
-	if err != nil {
-		panic(err)
-	}
+	CheckErr(err)
 
-	fmt.Println("Suceess")
 	return c.Redirect("http://localhost:3000")
 }
