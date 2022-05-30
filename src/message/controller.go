@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -55,51 +56,107 @@ func OAuth(c *fiber.Ctx) error {
 	cookie.Expires = time.Now().Add(time.Duration(auth.RefreshTokenExpiresIn) * time.Second)
 	c.Cookie(cookie)
 
+	return c.Redirect("http://localhost:3000/scopes")
+}
+
+func Scopes(c *fiber.Ctx) error {
+	req, err := http.NewRequest("GET", BASE_API_URL+"/v2/user/scopes", nil)
+	CheckErr(err)
+	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
+	client := http.Client{}
+	resp, err := client.Do(req)
+	CheckErr(err)
+	CheckStatus(resp)
+
+	var scopes ScopeResult
+	err = json.NewDecoder(resp.Body).Decode(&scopes)
+	CheckErr(err)
+
+	// print info's in console
+	fmt.Println("[+] Scope Result")
+	fmt.Println("	ID : ", scopes.ID)
+
+	for i, s := range scopes.Scopes {
+		fmt.Println("	Scopes - ", i)
+		fmt.Println("	  - Agreed : ", s.Agreed)
+		fmt.Println("	  - DisplayName : ", s.DisplayName)
+		fmt.Println("	  - ID : ", s.ID)
+		fmt.Println("	  - Revocable : ", s.Revocable)
+		fmt.Println("	  - Type : ", s.Type)
+		fmt.Println("	  - Using : ", s.Using)
+	}
+
 	return c.Redirect("http://localhost:3000/message")
 }
 
 func Message(c *fiber.Ctx) error {
 	return c.Render("message", fiber.Map{
 		"Title":    "Sucess Login",
-		"SubTitle": "Send To Me",
+		"SubTitle": "Step 1 - Send To Me",
 	})
 }
 
-func Send(c *fiber.Ctx) error {
-	client := http.Client{}
-	req, err := http.NewRequest("POST", BASE_API_URL+"/v2/api/talk/memo/default/send", nil)
+func Memo(c *fiber.Ctx) error {
+	// make text template
+	text := c.Query("text")
+	template := TextMessageTemplate{
+		ObjectType: "text",
+		Text:       text,
+		Link: Link{
+			WebUrl: "https://developers.kakao.com/docs/latest/ko/message/common",
+		},
+	}
+	out, err := json.Marshal(template)
 	CheckErr(err)
+	params := url.Values{}
+	params.Add("template_object", string(out))
+
+	req, err := http.NewRequest("POST", BASE_API_URL+"/v2/api/talk/memo/default/send", bytes.NewBufferString(params.Encode()))
+	CheckErr(err)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
+
+	client := http.Client{}
 	resp, err := client.Do(req)
 	CheckErr(err)
+	CheckStatus(resp)
 
-	var sendResult SendResult
-	err = json.NewDecoder(resp.Body).Decode(&sendResult)
+	var memo MemoSendResult
+	err = json.NewDecoder(resp.Body).Decode(&memo)
 	CheckErr(err)
 
 	// print info's in console
-	fmt.Println("[+] Default Send Result")
-	fmt.Println("	Result Code : ", sendResult.ResultCode)
+	fmt.Println("[+] Memo Default Send Result")
+	fmt.Println("	Result Code : ", memo.ResultCode)
 
-	return c.SendString("send")
+	return c.Render("memo", fiber.Map{
+		"Title":      "Sucess Send To me",
+		"ResultCode": memo.ResultCode,
+		"Text":       text,
+	})
 }
 
 func Logout(c *fiber.Ctx) error {
 	client := http.Client{}
 
-	// Logout
 	req, err := http.NewRequest("POST", BASE_API_URL+"/v1/user/logout", nil)
 	CheckErr(err)
 
 	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
-	_, err = client.Do(req)
+	resp, err := client.Do(req)
+	CheckErr(err)
+	CheckStatus(resp)
+
+	var logoutinfo LogoutInfo
+	err = json.NewDecoder(resp.Body).Decode(&logoutinfo)
 	CheckErr(err)
 
-	// Unlink
-	req, err = http.NewRequest("POST", BASE_API_URL+"/v1/user/unlink", nil)
-	CheckErr(err)
-	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
-	_, err = client.Do(req)
-	CheckErr(err)
+	// print info's in console
+	fmt.Println("[+] Logout")
+	fmt.Println("	ID : ", logoutinfo.ID)
+
+	// cookies clear
+	c.ClearCookie()
 
 	return c.Redirect("http://localhost:3000")
 }

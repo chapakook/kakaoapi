@@ -49,11 +49,19 @@ button{
     border-color: transparent;
     background-color: transparent !important;
 }
-.get{
+.btn{
     width: 250px;
 }
 
 h6{
     font-size: calc(2vmin);
     text-align: left;
+}
+
+input{
+    font-size: calc(10px + 2vmin);
+    margin: 50px;
+}
+.btn{
+    width: 250px;
 }

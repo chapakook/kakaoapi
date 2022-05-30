@@ -11,28 +11,14 @@
         <h1>{{.Title}}</h1>
     </div>
 
-    <!-- <div class="container">
-        <h6>
-            [+] Auth Result<br>
-            TokenType: {{.TokenType}}<br>
-            AccessToken: {{.AccessToken}}<br>
-            ExpiresIn: {{.ExpiresIn}}<br>
-            RefreshToken: {{.RefreshToken}}<br>
-            RefreshTokenExpiresIn: {{.RefreshTokenExpiresIn}}<br>
-            Scope: {{.Scope}}<br>
-        </h6>
-    </div> -->
-
     <div class="container">
         <h3>{{.SubTitle}}</h3>
-        <button class="get" onclick="send_to_me()">Start</button>
+        <form method="get" action="/memo">
+            <input id="text" type="text" name="text"/><br>
+            <input class="btn" type="submit" value="Submit"/>
+        </form>
     </div>
 
-    <script>
-        function send_to_me() {
-            location.href='http://localhost:3000/'
-        }
-    </script>
 </body>
 
 </html>
