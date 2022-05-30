@@ -1,0 +1,67 @@
+:root{
+    --gray-color :#717271;
+    --light-gray-color: #dee0e5;
+    --midium-gray-color: #999fa6;
+    --button-gray-color: #f0f1f0;
+    --footer-back-color: #f1f2f1;
+    --footer-border-color: #e3e4e3;
+
+    --button-text-gray-color: #5F6368;
+    --font-family: 'Apple SD Gothic Neo',arial,sans-serif;
+}  
+*{
+    padding: 0;
+    margin-left: 16px;
+    margin-right: 16px;
+    font-family: var(--font-family);
+}
+
+
+body{
+    text-align: center;
+    padding: 100px 0;
+}
+
+div{
+    min-height: 10vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+}
+
+img{
+    max-width: 100%;
+    max-height: 0%;
+}
+.logo{
+    object-fit: cover;
+    max-width: 60%;
+}
+
+button{
+    font-size: calc(10px + 2vmin);
+    margin: 50px;
+}
+.login{
+    border: none;
+    border-color: transparent;
+    background-color: transparent !important;
+}
+.btn{
+    width: 250px;
+}
+
+h6{
+    font-size: calc(2vmin);
+    text-align: left;
+}
+
+input{
+    font-size: calc(10px + 2vmin);
+    margin: 50px;
+}
+.btn{
+    width: 250px;
+}
