@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<header>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="./public/css/style.css">
+</header>
+
+<body>
+    <div class="container">
+        <img class="logo" src="/public/img/fiber_v2_logo.svg">
+        <h1>{{.Title}}</h1>
+    </div>
+
+    <div class="container">
+        <h6>
+            [+] Memo Send Result<br>
+            Result Code: {{.ResultCode}}<br>
+            Text: {{.Text}}
+        </h6>
+    </div>
+
+    <div class="container">
+        <button class="btn" onclick="check_channel_relationship()">logout</button>
+    </div>
+
+    <script>
+        function check_channel_relationship() {
+            location.href='http://localhost:3000/check'
+        }
+    </script>
+</body>
+
+</html>

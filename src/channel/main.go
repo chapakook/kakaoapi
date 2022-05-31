@@ -17,6 +17,8 @@ func main() {
 
 	app.Get("/", Index)
 	app.Get("/oauth", OAuth)
+	app.Get("/channel", Channel)
+	app.Get("/check", Check)
 
 	log.Fatal(app.Listen(PORT))
 }

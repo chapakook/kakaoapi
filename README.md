@@ -17,9 +17,9 @@ go get -u github.com/gofiber/template/html
 -----
 ## Sample API List
 ### Social integration API
-- [x] [Kakao Login](https://developers.kakao.com/product/kakaoLogin), last update: 2022.05
+- [x] ~~[Kakao Login](https://developers.kakao.com/product/kakaoLogin)~~, last update: 2022.05
 - [ ] [Kakao Talk Social](https://developers.kakao.com/product/kakaoTalkSocial)
-- [x] [Message](https://developers.kakao.com/product/message), last update: 2022.05
+- [x] ~~[Message](https://developers.kakao.com/product/message)~~, last update: 2022.05
 - [ ] [Map/Local](https://developers.kakao.com/product/map)
 - [ ] [Kakao Navi](https://developers.kakao.com/product/kakaoNav)
 - [ ] [Kakao Story](https://developers.kakao.com/product/kakaoStory)

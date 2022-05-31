@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -55,5 +56,43 @@ func OAuth(c *fiber.Ctx) error {
 	cookie.Expires = time.Now().Add(time.Duration(auth.RefreshTokenExpiresIn) * time.Second)
 	c.Cookie(cookie)
 
-	return c.Redirect("http://localhost:3000/scopes")
+	return c.Redirect("http://localhost:3000/channel")
+}
+
+func Channel(c *fiber.Ctx) error {
+	return c.Render("channel", fiber.Map{
+		"Title":    "Success Login",
+		"Subtitle": "Step 1 - Check Kakao Talk Channel Relationship",
+	})
+}
+
+func Check(c *fiber.Ctx) error {
+	params := url.Values{}
+	params.Add("channel_public_ids", CHANNEL_PUBLIC_ID)
+
+	req, err := http.NewRequest("GET", BASE_API_URL+"/v1/api/talk/channels", bytes.NewBufferString(params.Encode()))
+	CheckErr(err)
+	req.Header.Add("Authorization", "Bearer "+c.Cookies("accesstoken"))
+
+	client := http.Client{}
+	resp, err := client.Do(req)
+	CheckErr(err)
+	CheckStatus(resp)
+
+	var key key
+	err = json.NewDecoder(resp.Body).Decode(&key)
+	CheckErr(err)
+
+	// print info's in console
+	fmt.Println("[+] Channel Relationship Info")
+	fmt.Println("	UserID : ", key.UserID)
+	for i, c := range key.Channels {
+		fmt.Println("	Channels - ", i)
+		fmt.Println("	  - Channel uuid : ", c.ChannelUuid)
+		fmt.Println("	  - Channel Public ID : ", c.ChannelPublicID)
+		fmt.Println("	  - Relation : ", c.Relation)
+		fmt.Println("	  - Updated At : ", c.UpdatedAt)
+	}
+
+	return c.SendString("check")
 }
